@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অর্ডার করুন - SB BRAND SHOP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .order-page { padding: 15px; max-width: 550px; margin: 0 auto; }
+
+        /* প্রোডাক্ট সামারি কার্ড */
+        .product-summary {
+            background: white;
+            border-radius: 14px;
+            padding: 15px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+            border-left: 4px solid #006643;
+        }
+        .product-summary img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .ps-info h3 { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 6px; }
+        .ps-price { font-size: 18px; font-weight: bold; color: #d9534f; }
+        .ps-old { font-size: 13px; color: #aaa; text-decoration: line-through; margin-right: 6px; }
+
+        /* Quantity selector */
+        .qty-section {
+            background: white;
+            border-radius: 14px;
+            padding: 15px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .qty-section label { font-size: 14px; font-weight: 600; color: #555; display: block; margin-bottom: 10px; }
+        .qty-row { display: flex; align-items: center; gap: 15px; }
+        .qty-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 2px solid #006643; background: white;
+            color: #006643; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; transition: 0.2s;
+        }
+        .qty-btn:hover { background: #006643; color: white; }
+        .qty-num { font-size: 20px; font-weight: bold; min-width: 30px; text-align: center; }
+        .qty-total { margin-left: auto; font-size: 15px; font-weight: bold; color: #006643; }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .form-section h3 {
+            font-size: 15px; font-weight: 700; color: #006643;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+        }
+        .f-group { margin-bottom: 14px; }
+        .f-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+        .f-group input, .f-group textarea, .f-group select {
+            width: 100%; padding: 12px 14px;
+            border: 1.5px solid #e0e0e0; border-radius: 10px;
+            font-size: 14px; outline: none; transition: 0.2s;
+            background: #fafafa;
+        }
+        .f-group input:focus, .f-group textarea:focus, .f-group select:focus {
+            border-color: #006643; background: white;
+        }
+        .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Payment method */
+        .payment-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .pay-option {
+            flex: 1; min-width: 100px; padding: 12px 10px;
+            border: 2px solid #e0e0e0; border-radius: 10px;
+            text-align: center; cursor: pointer; transition: 0.2s;
+            font-size: 13px; font-weight: 600; color: #666;
+        }
+        .pay-option i { display: block; font-size: 22px; margin-bottom: 5px; }
+        .pay-option.selected { border-color: #006643; color: #006643; background: #f0fff8; }
+
+        /* Order summary */
+        .order-summary {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .sum-row { display: flex; justify-content: space-between; font-size: 14px; color: #666; margin-bottom: 10px; }
+        .sum-total { display: flex; justify-content: space-between; font-size: 17px; font-weight: bold; color: #006643; border-top: 1.5px solid #eee; padding-top: 12px; margin-top: 5px; }
+
+        /* Submit button */
+        .submit-order-btn {
+            width: 100%; padding: 16px; background: #006643; color: white;
+            border: none; border-radius: 14px; font-size: 17px; font-weight: bold;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 10px; margin-bottom: 20px;
+        }
+        .submit-order-btn:hover { background: #004d33; }
+        .submit-order-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+        /* Success screen */
+        .success-screen {
+            display: none; text-align: center; padding: 50px 20px;
+        }
+        .success-screen i { font-size: 70px; color: #006643; display: block; margin-bottom: 20px; animation: pop 0.5s ease; }
+        @keyframes pop { 0%{transform:scale(0)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
+        .success-screen h2 { font-size: 22px; color: #333; margin-bottom: 10px; }
+        .success-screen p { color: #666; font-size: 15px; line-height: 1.6; }
+        .go-home-btn { display: inline-block; margin-top: 25px; background: #006643; color: white; padding: 13px 30px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 15px; }
+
+        /* Login notice */
+        .login-notice {
+            background: #fff3cd; border: 1px solid #ffc107;
+            border-radius: 10px; padding: 12px 15px;
+            font-size: 13px; color: #856404; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .login-notice a { color: #006643; font-weight: bold; }
+
+        .free-delivery-note {
+            background: #f0fff8; border: 1px solid #006643;
+            border-radius: 10px; padding: 12px 15px;
+            font-size: 13px; color: #006643; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-header">
+        <div class="logo">
+            <a href="javascript:history.back()" style="color:white;margin-right:10px;">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            অর্ডার করুন
+        </div>
+    </header>
+
+    <!-- Order Form -->
+    <div class="order-page" id="orderPage">
+
+        <!-- প্রোডাক্ট info -->
+        <div class="product-summary" id="productSummary">
+            <img id="pImg" src="https://via.placeholder.com/80" alt="Product">
+            <div class="ps-info">
+                <h3 id="pName">লোড হচ্ছে...</h3>
+                <div>
+                    <span class="ps-old" id="pOldPrice"></span>
+                    <span class="ps-price" id="pPrice"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- পরিমাণ -->
+        <div class="qty-section">
+            <label>পরিমাণ নির্বাচন করুন</label>
+            <div class="qty-row">
+                <button class="qty-btn" id="qtyMinus">−</button>
+                <span class="qty-num" id="qtyDisplay">1</span>
+                <button class="qty-btn" id="qtyPlus">+</button>
+                <span class="qty-total" id="qtyTotal"></span>
+            </div>
+        </div>
+
+        <!-- Customer info -->
+        <div class="form-section">
+            <h3><i class="fa-solid fa-user"></i> আপনার তথ্য</h3>
+            <div id="loginNotice"></div>
+            <div class="f-group">
+                <label>পূর্ণ নাম *</label>
+                <input type="text" id="custName" placeholder="আপনার পূর্ণ নাম লিখুন">
+            </div>
+            <div class="f-group">
+                <label>ফোন নম্বর *</label>
+                <input type="tel" id="custPhone" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="f-group">
+                <label>বিকল্প ফোন (ঐচ্ছিক)</label>
+                <input type="tel" id="custPhone2" placeholder="01XXXXXXXXX">
+            </div>
+        </div>
+
+        <!-- Delivery address -->
+        <div class="form-section">
+            <h3><i class="fa-solid fa-location-dot"></i> ডেলিভারি ঠিকানা</h3>
+            <div class="f-group" id="deliveryZoneGroup">
+                <label>ডেলিভারি এলাকা *</label>
+                <div class="payment-options">
+                    <div class="pay-option selected" data-zone="dhaka">
+                        <i class="fa-solid fa-city"></i>
+                        ঢাকা জেলার ভিতরে<br><small>(৳80)</small>
+                    </div>
+                    <div class="pay-option" data-zone="outside">
+                        <i class="fa-solid fa-truck"></i>
+                        ঢাকা জেলার বাইরে<br><small>(৳130)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="f-group">
+                <label>এলাকা / থানার নাম *</label>
+                <input type="text" id="district" placeholder="যেমন: মিরপুর, ঢাকা">
+            </div>
+            <div class="f-group">
+                <label>বিস্তারিত ঠিকানা *</label>
+                <textarea id="address" rows="3" placeholder="বাড়ি/ফ্লাট নম্বর, রোড, এলাকা..."></textarea>
+            </div>
+        </div>
+
+        <!-- Payment method -->
+        <div class="form-section">
+            <h3><i class="fa-solid fa-money-bill"></i> পেমেন্ট পদ্ধতি</h3>
+            <div class="payment-options" id="paymentMethodGroup">
+                <div class="pay-option selected" data-pay="cod">
+                    <i class="fa-solid fa-money-bills"></i>
+                    ক্যাশ অন ডেলিভারি
+                </div>
+                <div class="pay-option" data-pay="bkash">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    বিকাশ
+                </div>
+                <div class="pay-option" data-pay="nagad">
+                    <i class="fa-solid fa-wallet"></i>
+                    নগদ
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h3 class="section-title" style="margin-bottom:14px;">অর্ডার সারসংক্ষেপ</h3>
+            <div class="sum-row"><span>প্রোডাক্ট মূল্য</span><span id="sumPrice">৳০</span></div>
+            <div class="sum-row"><span>পরিমাণ</span><span id="sumQty">×১</span></div>
+            <div class="sum-row"><span>ডেলিভারি চার্জ</span><span id="sumDelivery" style="color:#006643;">৳০</span></div>
+            <div class="sum-total"><span>সর্বমোট</span><span id="sumTotal">৳০</span></div>
+        </div>
+
+        <button class="submit-order-btn" id="placeOrderBtn">
+            <i class="fa-solid fa-bag-shopping"></i> অর্ডার নিশ্চিত করুন
+        </button>
+    </div>
+
+    <!-- Success Screen -->
+    <div class="order-page success-screen" id="successScreen">
+        <i class="fa-solid fa-circle-check"></i>
+        <h2>অর্ডার সফল হয়েছে!</h2>
+        <p>আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে।<br>আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব। 😊</p>
+        <p id="orderIdDisplay" style="margin-top:15px;font-weight:bold;color:#006643;"></p>
+        <a href="index.html" class="go-home-btn">← হোমে ফিরে যান</a>
+    </div>
+
+    <script type="module">
+        import { db, auth } from './firebase-config.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        // URL থেকে product data নেওয়া
+        const params = new URLSearchParams(window.location.search);
+        const product = {
+            id: params.get('id') || '',
+            name: decodeURIComponent(params.get('name') || 'প্রোডাক্ট'),
+            price: parseFloat(params.get('price') || 0),
+            oldPrice: params.get('oldPrice') ? parseFloat(params.get('oldPrice')) : null,
+            imageUrl: decodeURIComponent(params.get('img') || ''),
+            freeDelivery: params.get('freeDelivery') === '1'
+        };
+
+        // Product দেখানো
+        document.getElementById('pName').textContent = product.name;
+        document.getElementById('pPrice').textContent = '৳' + product.price;
+        document.getElementById('pImg').src = product.imageUrl || 'https://via.placeholder.com/80';
+        if (product.oldPrice) {
+            document.getElementById('pOldPrice').textContent = '৳' + product.oldPrice;
+        }
+
+        // Delivery charge
+        let deliveryZone = 'dhaka'; // default
+        const DELIVERY_RATES = { dhaka: 80, outside: 130 };
+
+        function getDeliveryCharge() {
+            return product.freeDelivery ? 0 : DELIVERY_RATES[deliveryZone];
+        }
+
+        // যদি ফ্রি ডেলিভারি প্রোডাক্ট হয়, zone selector hide করে note দেখানো
+        if (product.freeDelivery) {
+            document.getElementById('deliveryZoneGroup').innerHTML = `
+                <label>ডেলিভারি এলাকা</label>
+                <div class="free-delivery-note">
+                    <i class="fa-solid fa-truck-fast"></i> এই প্রোডাক্টে ফ্রি ডেলিভারি প্রযোজ্য!
+                </div>`;
+        } else {
+            document.querySelectorAll('#deliveryZoneGroup .pay-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('#deliveryZoneGroup .pay-option').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    deliveryZone = this.dataset.zone;
+                    updateQty();
+                });
+            });
+        }
+
+        // Quantity
+        let qty = 1;
+        function updateQty() {
+            const deliveryCharge = getDeliveryCharge();
+            const subtotal = product.price * qty;
+            document.getElementById('qtyDisplay').textContent = qty;
+            document.getElementById('qtyTotal').textContent = '= ৳' + subtotal;
+            document.getElementById('sumPrice').textContent = '৳' + product.price;
+            document.getElementById('sumQty').textContent = '×' + qty;
+            document.getElementById('sumDelivery').textContent = deliveryCharge === 0 ? 'ফ্রি' : '৳' + deliveryCharge;
+            document.getElementById('sumTotal').textContent = '৳' + (subtotal + deliveryCharge);
+        }
+        document.getElementById('qtyMinus').addEventListener('click', () => { if (qty > 1) { qty--; updateQty(); } });
+        document.getElementById('qtyPlus').addEventListener('click', () => { qty++; updateQty(); });
+        updateQty();
+
+        // Payment selection
+        let selectedPayment = 'cod';
+        document.querySelectorAll('#paymentMethodGroup .pay-option').forEach(el => {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('#paymentMethodGroup .pay-option').forEach(e => e.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPayment = this.dataset.pay;
+            });
+        });
+
+        // Auth check
+        let currentUser = null;
+        onAuthStateChanged(auth, user => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('custName').value = user.displayName || '';
+                document.getElementById('loginNotice').innerHTML = '';
+            } else {
+                document.getElementById('loginNotice').innerHTML = `
+                    <div class="login-notice">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>অর্ডার track করতে <a href="login.html">লগইন</a> করুন। Guest হিসেবেও অর্ডার করা যাবে।</span>
+                    </div>`;
+            }
+        });
+
+        // Place Order
+        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const phone2 = document.getElementById('custPhone2').value.trim();
+            const district = document.getElementById('district').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const btn = document.getElementById('placeOrderBtn');
+
+            if (!name) { alert('আপনার নাম দিন'); return; }
+            if (!phone || phone.length < 11) { alert('সঠিক ফোন নম্বর দিন'); return; }
+            if (!district) { alert('এলাকা/থানার নাম দিন'); return; }
+            if (!address) { alert('বিস্তারিত ঠিকানা দিন'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> অর্ডার হচ্ছে...';
+
+            const deliveryCharge = getDeliveryCharge();
+            const subtotal = product.price * qty;
+            const total = subtotal + deliveryCharge;
+            const zoneLabel = deliveryZone === 'dhaka' ? 'ঢাকা জেলার ভিতরে' : 'ঢাকা জেলার বাইরে';
+            const fullAddress = `${address}, ${district}`;
+
+            try {
+                const orderRef = await addDoc(collection(db, 'orders'), {
+                    userId: currentUser ? currentUser.uid : 'guest',
+                    userEmail: currentUser ? currentUser.email : 'guest',
+                    name, phone,
+                    phone2: phone2 || null,
+                    address: fullAddress,
+                    deliveryZone: product.freeDelivery ? 'free' : deliveryZone,
+                    deliveryZoneLabel: product.freeDelivery ? 'ফ্রি ডেলিভারি' : zoneLabel,
+                    deliveryCharge,
+                    items: [{ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, quantity: qty }],
+                    subtotal, total,
+                    paymentMethod: selectedPayment,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+
+                // Success screen
+                document.getElementById('orderPage').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+                document.getElementById('orderIdDisplay').textContent =
+                    'অর্ডার নম্বর: #' + orderRef.id.substring(0, 8).toUpperCase();
+            } catch(e) {
+                alert('অর্ডার ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> অর্ডার নিশ্চিত করুন';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SB BRAND SHOP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-wrap { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .admin-tabs { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 20px; padding-bottom: 4px; }
+        .admin-tabs::-webkit-scrollbar { display: none; }
+        .a-tab { white-space: nowrap; padding: 10px 16px; border-radius: 20px; border: 1.5px solid #ddd; background: white; cursor: pointer; font-size: 13px; font-weight: 600; color: #666; transition: 0.2s; }
+        .a-tab.active { background: #006643; color: white; border-color: #006643; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
+        .stat-box { background: white; border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .stat-num { font-size: 30px; font-weight: bold; color: #006643; }
+        .stat-lbl { font-size: 13px; color: #999; margin-top: 4px; }
+
+        /* Form */
+        .a-form { background: white; border-radius: 14px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .a-form h3 { font-size: 16px; color: #006643; margin-bottom: 16px; }
+        .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .f-group { margin-bottom: 13px; }
+        .f-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 5px; }
+        .f-group input, .f-group select, .f-group textarea {
+            width: 100%; padding: 11px 13px; border: 1.5px solid #e0e0e0;
+            border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s;
+        }
+        .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color: #006643; }
+
+        /* Upload area */
+        .upload-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 22px; text-align: center; cursor: pointer; color: #aaa; transition: 0.2s; }
+        .upload-zone:hover { border-color: #006643; color: #006643; }
+        .upload-zone i { font-size: 28px; display: block; margin-bottom: 6px; }
+        .img-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 10px; border: 1px solid #eee; margin-top: 10px; display: none; }
+        .upload-status { font-size: 12px; color: #006643; margin-top: 6px; }
+        .img-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
+        .img-grid-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1.5px solid #eee; }
+        .img-grid-item img { width: 100%; height: 100%; object-fit: cover; }
+        .img-grid-item .img-num { position: absolute; top: 2px; left: 2px; background: rgba(0,102,67,0.85); color: white; font-size: 10px; padding: 1px 5px; border-radius: 4px; }
+
+        .a-check { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+        .a-check input { width: 18px; height: 18px; cursor: pointer; }
+
+        .save-btn { width: 100%; padding: 14px; background: #006643; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
+        .save-btn:hover { background: #004d33; }
+        .save-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+        /* Product list */
+        .p-item { display: flex; align-items: center; gap: 12px; background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .p-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .p-info { flex: 1; }
+        .p-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+        .p-info span { font-size: 13px; color: #d9534f; font-weight: bold; }
+        .p-info small { font-size: 12px; color: #aaa; margin-left: 8px; }
+        .p-actions { display: flex; flex-direction: column; gap: 4px; align-items: center; flex-shrink: 0; }
+        .del-btn { background: none; border: none; color: #d9534f; cursor: pointer; font-size: 20px; padding: 5px; }
+        .edit-btn { background: none; border: none; color: #0d6efd; cursor: pointer; font-size: 20px; padding: 5px; }
+
+        /* Order cards */
+        .o-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .o-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .o-id { font-size: 12px; font-family: monospace; color: #aaa; }
+        .o-total { font-size: 16px; font-weight: bold; color: #006643; }
+        .o-info p { font-size: 13px; color: #555; margin-bottom: 4px; }
+        .o-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .o-item-row img { width: 42px; height: 42px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 1px solid #eee; }
+        .o-item-row span { font-size: 13px; color: #555; }
+        .status-sel { padding: 7px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px; margin-top: 8px; width: 100%; outline: none; }
+        .upd-btn { background: #006643; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; margin-top: 8px; transition: 0.2s; }
+        .upd-btn:hover { background: #004d33; }
+
+        .no-data { text-align: center; padding: 30px; color: #aaa; font-size: 15px; }
+        .access-denied { text-align: center; padding: 60px 20px; }
+        .access-denied i { font-size: 65px; color: #ddd; display: block; margin-bottom: 15px; }
+
+        /* Category list */
+        .c-item { display: flex; align-items: center; gap: 12px; background: white; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .c-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #006643; flex-shrink: 0; }
+        .c-item .c-name { flex: 1; font-size: 14px; font-weight: 600; color: #333; }
+        .c-item .c-order { font-size: 12px; color: #aaa; margin-right: 5px; }
+
+        /* Edit Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.55); z-index: 999; align-items: flex-start;
+            justify-content: center; overflow-y: auto; padding: 30px 12px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: white; border-radius: 14px; padding: 20px; max-width: 500px;
+            width: 100%; position: relative; margin-bottom: 30px;
+        }
+        .modal-close {
+            position: absolute; top: 14px; right: 14px; background: none; border: none;
+            font-size: 22px; color: #999; cursor: pointer;
+        }
+        .modal-box h3 { font-size: 16px; color: #006643; margin-bottom: 16px; }
+        .current-img-note { font-size: 12px; color: #888; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <header class="top-header">
+        <div class="logo">⚙️ Admin Panel</div>
+    </header>
+
+    <div id="adminRoot">
+        <div style="text-align:center;padding:60px;color:#999;">যাচাই হচ্ছে...</div>
+    </div>
+
+    <!-- EDIT PRODUCT MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3>✏️ প্রোডাক্ট এডিট করুন</h3>
+            <div class="f-group">
+                <label>বর্তমান ছবি সমূহ</label>
+                <div class="img-grid" id="eImgGrid"></div>
+                <div class="current-img-note">নতুন ছবি আপলোড করলে পুরনো ছবিগুলো পরিবর্তন হয়ে যাবে। কিছু না দিলে পুরনো ছবিই থাকবে।</div>
+            </div>
+            <div class="f-group">
+                <label>নতুন ছবি (ঐচ্ছিক, ২-৫টি)</label>
+                <div class="upload-zone" onclick="document.getElementById('eImg').click()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    নতুন ছবি বেছে নিতে ক্লিক করুন
+                </div>
+                <input type="file" id="eImg" accept="image/*" multiple style="display:none">
+                <div class="img-grid" id="eImgNewGrid"></div>
+                <div class="upload-status" id="editUploadStatus"></div>
+            </div>
+            <div class="f-group">
+                <label>প্রোডাক্টের নাম *</label>
+                <input type="text" id="eName">
+            </div>
+            <div class="f-row">
+                <div class="f-group">
+                    <label>বিক্রয় মূল্য (৳) *</label>
+                    <input type="number" id="ePrice">
+                </div>
+                <div class="f-group">
+                    <label>আগের মূল্য (৳)</label>
+                    <input type="number" id="eOldPrice">
+                </div>
+            </div>
+            <div class="f-row">
+                <div class="f-group">
+                    <label>ডিসকাউন্ট (%)</label>
+                    <input type="number" id="eDiscount">
+                </div>
+                <div class="f-group">
+                    <label>ক্যাটাগরি *</label>
+                    <select id="eCategory"></select>
+                </div>
+            </div>
+            <div class="f-group">
+                <label>স্পেসিফিকেশন (প্রতি লাইনে একটি করে লিখুন)</label>
+                <textarea id="eSpec" rows="4"></textarea>
+            </div>
+            <div class="f-group">
+                <label>বিস্তারিত বিবরণ (Description)</label>
+                <textarea id="eDesc" rows="4"></textarea>
+            </div>
+            <div class="f-group">
+                <label class="a-check">
+                    <input type="checkbox" id="eIsOffer">
+                    অফার সেকশনে দেখাবে (বিশেষ মূল্য ছাড়)
+                </label>
+            </div>
+            <div class="f-group">
+                <label class="a-check">
+                    <input type="checkbox" id="eFreeDelivery">
+                    এই প্রোডাক্টে ফ্রি ডেলিভারি
+                </label>
+            </div>
+            <button class="save-btn" id="saveEditBtn">
+                <i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সেভ করুন
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, auth, CLOUDINARY_CLOUD, CLOUDINARY_PRESET } from './firebase-config.js';
+        import {
+            collection, addDoc, getDocs, getDoc, deleteDoc, doc, updateDoc,
+            query, orderBy, serverTimestamp, where
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        // ⚠️ এখানে আপনার admin email দিন
+        const ADMIN_EMAIL = 'sadikul.pcml@gmail.com';
+
+        onAuthStateChanged(auth, user => {
+            if (!user || user.email !== ADMIN_EMAIL) {
+                document.getElementById('adminRoot').innerHTML = `
+                    <div class="access-denied">
+                        <i class="fa-solid fa-lock"></i>
+                        <p style="color:#999;margin-bottom:15px;">Admin access নেই</p>
+                        <a href="index.html" style="color:#006643;font-weight:bold;">← Home-এ যান</a>
+                    </div>`;
+                return;
+            }
+            buildAdmin();
+        });
+
+        function buildAdmin() {
+            document.getElementById('adminRoot').innerHTML = `
+            <div class="admin-wrap">
+                <div class="admin-tabs">
+                    <button class="a-tab active" data-tab="dashboard">📊 Dashboard</button>
+                    <button class="a-tab" data-tab="addProduct">➕ প্রোডাক্ট যোগ</button>
+                    <button class="a-tab" data-tab="products">📦 প্রোডাক্ট লিস্ট</button>
+                    <button class="a-tab" data-tab="orders">🛒 অর্ডার সমূহ</button>
+                    <button class="a-tab" data-tab="banners">🖼️ ব্যানার</button>
+                    <button class="a-tab" data-tab="categories">🗂️ ক্যাটাগরি</button>
+                </div>
+
+                <!-- DASHBOARD -->
+                <div class="tab-pane active" id="tab-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-box"><div class="stat-num" id="s-products">-</div><div class="stat-lbl">মোট প্রোডাক্ট</div></div>
+                        <div class="stat-box"><div class="stat-num" id="s-orders">-</div><div class="stat-lbl">মোট অর্ডার</div></div>
+                        <div class="stat-box"><div class="stat-num" id="s-pending">-</div><div class="stat-lbl">অপেক্ষমান অর্ডার</div></div>
+                        <div class="stat-box"><div class="stat-num" id="s-revenue">-</div><div class="stat-lbl">মোট আয় (৳)</div></div>
+                    </div>
+                </div>
+
+                <!-- ADD PRODUCT -->
+                <div class="tab-pane" id="tab-addProduct">
+                    <div class="a-form">
+                        <h3>➕ নতুন প্রোডাক্ট যোগ করুন</h3>
+                        <div class="f-group">
+                            <label>প্রোডাক্টের ছবি * (কমপক্ষে ২টি, সর্বোচ্চ ৫টি)</label>
+                            <div class="upload-zone" onclick="document.getElementById('pImg').click()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                ২-৫টি ছবি একসাথে বেছে নিন (Ctrl চেপে multiple select করুন)
+                            </div>
+                            <input type="file" id="pImg" accept="image/*" multiple style="display:none">
+                            <div class="img-grid" id="pImgGrid"></div>
+                            <div class="upload-status" id="uploadStatus"></div>
+                        </div>
+                        <div class="f-group">
+                            <label>প্রোডাক্টের নাম *</label>
+                            <input type="text" id="pName" placeholder="যেমন: স্টাইলিশ লেদার ব্যাগ">
+                        </div>
+                        <div class="f-row">
+                            <div class="f-group">
+                                <label>বিক্রয় মূল্য (৳) *</label>
+                                <input type="number" id="pPrice" placeholder="৮৫০">
+                            </div>
+                            <div class="f-group">
+                                <label>আগের মূল্য (৳)</label>
+                                <input type="number" id="pOldPrice" placeholder="১০০০">
+                            </div>
+                        </div>
+                        <div class="f-row">
+                            <div class="f-group">
+                                <label>ডিসকাউন্ট (%)</label>
+                                <input type="number" id="pDiscount" placeholder="১৫">
+                            </div>
+                            <div class="f-group">
+                                <label>ক্যাটাগরি *</label>
+                                <select id="pCategory">
+                                    <option value="">বেছে নিন</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="f-group">
+                            <label>স্পেসিফিকেশন (প্রতি লাইনে একটি করে লিখুন)</label>
+                            <textarea id="pSpec" rows="4" placeholder="রং: কালো&#10;ম্যাটেরিয়াল: লেদার&#10;সাইজ: মিডিয়াম"></textarea>
+                        </div>
+                        <div class="f-group">
+                            <label>বিস্তারিত বিবরণ (Description)</label>
+                            <textarea id="pDesc" rows="4" placeholder="প্রোডাক্ট সম্পর্কে বিস্তারিত লিখুন..."></textarea>
+                        </div>
+                        <div class="f-group">
+                            <label class="a-check">
+                                <input type="checkbox" id="pIsOffer">
+                                অফার সেকশনে দেখাবে (বিশেষ মূল্য ছাড়)
+                            </label>
+                        </div>
+                        <div class="f-group">
+                            <label class="a-check">
+                                <input type="checkbox" id="pFreeDelivery">
+                                এই প্রোডাক্টে ফ্রি ডেলিভারি
+                            </label>
+                        </div>
+                        <button class="save-btn" id="saveProductBtn">
+                            <i class="fa-solid fa-floppy-disk"></i> প্রোডাক্ট সেভ করুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS LIST -->
+                <div class="tab-pane" id="tab-products">
+                    <div id="productList"><div class="no-data">লোড হচ্ছে...</div></div>
+                </div>
+
+                <!-- ORDERS -->
+                <div class="tab-pane" id="tab-orders">
+                    <div id="orderList"><div class="no-data">লোড হচ্ছে...</div></div>
+                </div>
+
+                <!-- BANNERS -->
+                <div class="tab-pane" id="tab-banners">
+                    <div class="a-form">
+                        <h3>🖼️ নতুন ব্যানার যোগ করুন</h3>
+                        <div class="f-group">
+                            <label>ব্যানার ছবি *</label>
+                            <div class="upload-zone" onclick="document.getElementById('bImg').click()">
+                                <i class="fa-solid fa-image"></i>
+                                ব্যানার ছবি আপলোড করুন (600×200 বা বড়)
+                            </div>
+                            <input type="file" id="bImg" accept="image/*" style="display:none">
+                            <img id="bImgPrev" class="img-preview">
+                        </div>
+                        <div class="f-group">
+                            <label>ক্রম নম্বর (১ = প্রথমে দেখাবে)</label>
+                            <input type="number" id="bOrder" value="1" min="1">
+                        </div>
+                        <button class="save-btn" id="saveBannerBtn">
+                            <i class="fa-solid fa-floppy-disk"></i> ব্যানার সেভ করুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CATEGORIES -->
+                <div class="tab-pane" id="tab-categories">
+                    <div class="a-form">
+                        <h3>🗂️ নতুন ক্যাটাগরি যোগ করুন</h3>
+                        <div class="f-group">
+                            <label>ক্যাটাগরি আইকন/ছবি *</label>
+                            <div class="upload-zone" onclick="document.getElementById('cImg').click()">
+                                <i class="fa-solid fa-image"></i>
+                                ছবি আপলোড করতে এখানে ক্লিক করুন
+                            </div>
+                            <input type="file" id="cImg" accept="image/*" style="display:none">
+                            <img id="cImgPrev" class="img-preview">
+                        </div>
+                        <div class="f-group">
+                            <label>ক্যাটাগরির নাম *</label>
+                            <input type="text" id="cName" placeholder="যেমন: ব্যাগস">
+                        </div>
+                        <div class="f-group">
+                            <label>ক্রম নম্বর (১ = প্রথমে দেখাবে)</label>
+                            <input type="number" id="cOrder" value="1" min="1">
+                        </div>
+                        <button class="save-btn" id="saveCategoryBtn">
+                            <i class="fa-solid fa-floppy-disk"></i> ক্যাটাগরি সেভ করুন
+                        </button>
+                    </div>
+
+                    <h3 style="font-size:15px;color:#006643;margin:20px 0 12px;">📋 বিদ্যমান ক্যাটাগরি সমূহ</h3>
+                    <div id="categoryList"><div class="no-data">লোড হচ্ছে...</div></div>
+                </div>
+            </div>`;
+
+            // Tab switching
+            document.querySelectorAll('.a-tab').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.a-tab').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    const pane = document.getElementById('tab-' + this.dataset.tab);
+                    pane.classList.add('active');
+                    if (this.dataset.tab === 'products') loadProductList();
+                    if (this.dataset.tab === 'orders') loadOrderList();
+                    if (this.dataset.tab === 'categories') loadCategoryList();
+                });
+            });
+
+            // Image preview
+            document.getElementById('pImg').addEventListener('change', function() {
+                previewMultiImg(this, 'pImgGrid');
+            });
+            document.getElementById('bImg').addEventListener('change', function() {
+                previewImg(this, 'bImgPrev');
+            });
+            document.getElementById('cImg').addEventListener('change', function() {
+                previewImg(this, 'cImgPrev');
+            });
+            document.getElementById('eImg').addEventListener('change', function() {
+                previewMultiImg(this, 'eImgNewGrid', 'editUploadStatus');
+            });
+
+            // Save product
+            document.getElementById('saveProductBtn').addEventListener('click', saveProduct);
+            // Save banner
+            document.getElementById('saveBannerBtn').addEventListener('click', saveBanner);
+            // Save category
+            document.getElementById('saveCategoryBtn').addEventListener('click', saveCategory);
+            // Save edit
+            document.getElementById('saveEditBtn').addEventListener('click', saveEditProduct);
+
+            loadDashboard();
+            loadCategoryDropdown();
+        }
+
+        function previewImg(input, previewId) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById(previewId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewMultiImg(input, gridId, statusId) {
+            const files = Array.from(input.files);
+            const grid = document.getElementById(gridId);
+            const status = statusId ? document.getElementById(statusId) : document.getElementById('uploadStatus');
+            grid.innerHTML = '';
+
+            if (files.length === 0) {
+                status.textContent = '';
+            } else if (files.length < 2) {
+                status.textContent = '⚠️ কমপক্ষে ২টি ছবি বেছে নিন';
+                status.style.color = '#d9534f';
+            } else if (files.length > 5) {
+                status.textContent = '⚠️ সর্বোচ্চ ৫টি ছবি বেছে নেওয়া যাবে';
+                status.style.color = '#d9534f';
+            } else {
+                status.textContent = `✅ ${files.length}টি ছবি নির্বাচিত হয়েছে`;
+                status.style.color = '#006643';
+            }
+
+            files.slice(0, 5).forEach((file, i) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement('div');
+                    div.className = 'img-grid-item';
+                    div.innerHTML = `<span class="img-num">${i+1}</span><img src="${e.target.result}">`;
+                    grid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ========== CLOUDINARY UPLOAD ==========
+        async function uploadImage(file) {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', CLOUDINARY_PRESET);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+                method: 'POST', body: fd
+            });
+            const data = await res.json();
+            if (!data.secure_url) throw new Error('Upload failed');
+            return data.secure_url;
+        }
+
+        // ========== DASHBOARD ==========
+        async function loadDashboard() {
+            try {
+                const [pSnap, oSnap] = await Promise.all([
+                    getDocs(collection(db, 'products')),
+                    getDocs(collection(db, 'orders'))
+                ]);
+                let pending = 0, revenue = 0;
+                oSnap.forEach(d => {
+                    const o = d.data();
+                    if (o.status === 'pending') pending++;
+                    if (o.status === 'delivered') revenue += o.total || 0;
+                });
+                document.getElementById('s-products').textContent = pSnap.size;
+                document.getElementById('s-orders').textContent = oSnap.size;
+                document.getElementById('s-pending').textContent = pending;
+                document.getElementById('s-revenue').textContent = revenue.toLocaleString('bn-BD');
+            } catch(e) {}
+        }
+
+        // ========== SAVE PRODUCT ==========
+        async function saveProduct() {
+            const name = document.getElementById('pName').value.trim();
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const oldPrice = parseFloat(document.getElementById('pOldPrice').value) || null;
+            const discount = parseInt(document.getElementById('pDiscount').value) || 0;
+            const category = document.getElementById('pCategory').value;
+            const isOffer = document.getElementById('pIsOffer').checked;
+            const freeDelivery = document.getElementById('pFreeDelivery').checked;
+            const specification = document.getElementById('pSpec').value.trim();
+            const description = document.getElementById('pDesc').value.trim();
+            const files = Array.from(document.getElementById('pImg').files);
+            const btn = document.getElementById('saveProductBtn');
+            const status = document.getElementById('uploadStatus');
+
+            if (!name || !price || !category) {
+                alert('নাম, মূল্য এবং ক্যাটাগরি আবশ্যক!');
+                return;
+            }
+            if (files.length < 2 || files.length > 5) {
+                alert('কমপক্ষে ২টি এবং সর্বোচ্চ ৫টি ছবি দিতে হবে!');
+                return;
+            }
+            btn.disabled = true;
+            try {
+                const images = [];
+                for (let i = 0; i < files.length; i++) {
+                    status.textContent = `📤 ছবি আপলোড হচ্ছে (${i+1}/${files.length})...`;
+                    status.style.color = '#006643';
+                    btn.textContent = `ছবি আপলোড হচ্ছে (${i+1}/${files.length})...`;
+                    const url = await uploadImage(files[i]);
+                    images.push(url);
+                }
+                status.textContent = '💾 Database-এ সেভ হচ্ছে...';
+                btn.textContent = 'সেভ হচ্ছে...';
+                await addDoc(collection(db, 'products'), {
+                    name, price, oldPrice, discount, category, isOffer, freeDelivery,
+                    specification, description,
+                    images,
+                    imageUrl: images[0], // প্রথম ছবি = main image (পুরানো কোডের সাথে compatibility)
+                    createdAt: serverTimestamp()
+                });
+                alert('✅ প্রোডাক্ট সফলভাবে যোগ হয়েছে!');
+                // Form reset
+                ['pName','pPrice','pOldPrice','pDiscount','pSpec','pDesc'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('pCategory').value = '';
+                document.getElementById('pIsOffer').checked = false;
+                document.getElementById('pFreeDelivery').checked = false;
+                document.getElementById('pImg').value = '';
+                document.getElementById('pImgGrid').innerHTML = '';
+                status.textContent = '';
+                loadDashboard();
+            } catch(e) {
+                alert('সেভ ব্যর্থ: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> প্রোডাক্ট সেভ করুন';
+            }
+        }
+
+        // ========== PRODUCT LIST ==========
+        async function loadProductList() {
+            const box = document.getElementById('productList');
+            box.innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
+            try {
+                const snap = await getDocs(collection(db, 'products'));
+                if (snap.empty) { box.innerHTML = '<div class="no-data">কোনো প্রোডাক্ট নেই</div>'; return; }
+                let html = '';
+                snap.forEach(d => {
+                    const p = d.data();
+                    html += `
+                    <div class="p-item">
+                        <img src="${p.imageUrl}" alt="${p.name}">
+                        <div class="p-info">
+                            <h4>${p.name}</h4>
+                            <span>৳${p.price}</span>
+                            <small>${p.category}</small>
+                            ${p.isOffer ? '<small style="color:#006643;margin-left:4px;">🏷️ Offer</small>' : ''}
+                            ${p.freeDelivery ? '<small style="color:#0d6efd;margin-left:4px;">🚚 Free Delivery</small>' : ''}
+                        </div>
+                        <div class="p-actions">
+                            <button class="edit-btn" onclick="openEditModal('${d.id}')">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="del-btn" onclick="deleteProduct('${d.id}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                });
+                box.innerHTML = html;
+            } catch(e) { box.innerHTML = '<div class="no-data" style="color:red;">লোড ব্যর্থ</div>'; }
+        }
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('এই প্রোডাক্ট মুছে দেবেন?')) return;
+            await deleteDoc(doc(db, 'products', id));
+            loadProductList();
+            loadDashboard();
+        };
+
+        // ========== EDIT PRODUCT ==========
+        let currentEditId = null;
+
+        window.openEditModal = async function(id) {
+            currentEditId = id;
+            const modal = document.getElementById('editModal');
+            const grid = document.getElementById('eImgGrid');
+            grid.innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
+            document.getElementById('eImgNewGrid').innerHTML = '';
+            document.getElementById('editUploadStatus').textContent = '';
+            document.getElementById('eImg').value = '';
+            modal.classList.add('open');
+
+            try {
+                const snap = await getDoc(doc(db, 'products', id));
+                if (!snap.exists()) { alert('প্রোডাক্ট পাওয়া যায়নি'); closeEditModal(); return; }
+                const p = snap.data();
+
+                // Fill current images
+                const imgs = p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+                grid.innerHTML = imgs.map((url, i) => `
+                    <div class="img-grid-item"><span class="img-num">${i+1}</span><img src="${url}"></div>
+                `).join('') || '<div class="no-data">কোনো ছবি নেই</div>';
+
+                // Fill category dropdown for edit modal
+                await loadEditCategoryDropdown(p.category);
+
+                document.getElementById('eName').value = p.name || '';
+                document.getElementById('ePrice').value = p.price || '';
+                document.getElementById('eOldPrice').value = p.oldPrice || '';
+                document.getElementById('eDiscount').value = p.discount || '';
+                document.getElementById('eSpec').value = p.specification || '';
+                document.getElementById('eDesc').value = p.description || '';
+                document.getElementById('eIsOffer').checked = !!p.isOffer;
+                document.getElementById('eFreeDelivery').checked = !!p.freeDelivery;
+            } catch(e) {
+                alert('তথ্য লোড ব্যর্থ: ' + e.message);
+                closeEditModal();
+            }
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.remove('open');
+            currentEditId = null;
+        };
+
+        async function loadEditCategoryDropdown(selectedVal) {
+            const sel = document.getElementById('eCategory');
+            try {
+                const snap = await getDocs(query(collection(db, 'categories'), orderBy('order')));
+                sel.innerHTML = '';
+                if (snap.empty) {
+                    ['ব্যাগস','ফ্যাশন','জুতো','ঘড়ি'].forEach(c => {
+                        sel.innerHTML += `<option value="${c}">${c}</option>`;
+                    });
+                } else {
+                    snap.forEach(d => {
+                        const c = d.data();
+                        sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                    });
+                }
+                sel.value = selectedVal || '';
+            } catch(e) {}
+        }
+
+        async function saveEditProduct() {
+            if (!currentEditId) return;
+            const name = document.getElementById('eName').value.trim();
+            const price = parseFloat(document.getElementById('ePrice').value);
+            const oldPrice = parseFloat(document.getElementById('eOldPrice').value) || null;
+            const discount = parseInt(document.getElementById('eDiscount').value) || 0;
+            const category = document.getElementById('eCategory').value;
+            const isOffer = document.getElementById('eIsOffer').checked;
+            const freeDelivery = document.getElementById('eFreeDelivery').checked;
+            const specification = document.getElementById('eSpec').value.trim();
+            const description = document.getElementById('eDesc').value.trim();
+            const files = Array.from(document.getElementById('eImg').files);
+            const btn = document.getElementById('saveEditBtn');
+            const status = document.getElementById('editUploadStatus');
+
+            if (!name || !price || !category) {
+                alert('নাম, মূল্য এবং ক্যাটাগরি আবশ্যক!');
+                return;
+            }
+            if (files.length > 0 && (files.length < 2 || files.length > 5)) {
+                alert('নতুন ছবি দিতে চাইলে কমপক্ষে ২টি এবং সর্বোচ্চ ৫টি দিতে হবে!');
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                const updateData = {
+                    name, price, oldPrice, discount, category, isOffer, freeDelivery,
+                    specification, description
+                };
+
+                if (files.length > 0) {
+                    const images = [];
+                    for (let i = 0; i < files.length; i++) {
+                        status.textContent = `📤 ছবি আপলোড হচ্ছে (${i+1}/${files.length})...`;
+                        status.style.color = '#006643';
+                        btn.textContent = `ছবি আপলোড হচ্ছে (${i+1}/${files.length})...`;
+                        const url = await uploadImage(files[i]);
+                        images.push(url);
+                    }
+                    updateData.images = images;
+                    updateData.imageUrl = images[0];
+                }
+
+                status.textContent = '💾 Database-এ সেভ হচ্ছে...';
+                btn.textContent = 'সেভ হচ্ছে...';
+                await updateDoc(doc(db, 'products', currentEditId), updateData);
+
+                alert('✅ প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
+                closeEditModal();
+                loadProductList();
+                loadDashboard();
+            } catch(e) {
+                alert('আপডেট ব্যর্থ: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> পরিবর্তন সেভ করুন';
+            }
+        }
+
+        // ========== ORDER LIST ==========
+        async function loadOrderList() {
+            const box = document.getElementById('orderList');
+            box.innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
+            try {
+                const snap = await getDocs(collection(db, 'orders'));
+                if (snap.empty) { box.innerHTML = '<div class="no-data">কোনো অর্ডার নেই</div>'; return; }
+                const orders = [];
+                snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                orders.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                let html = '';
+                orders.forEach(o => {
+                    // 🔧 FIX: প্রতিটি item-এর ছবি (imageUrl) সহ দেখানো হচ্ছে
+                    const itemsHtml = (o.items || []).map(i => `
+                        <div class="o-item-row">
+                            <img src="${i.imageUrl || 'https://via.placeholder.com/42'}" alt="${i.name}">
+                            <span>${i.name} ×${i.quantity}</span>
+                        </div>
+                    `).join('');
+                    html += `
+                    <div class="o-card">
+                        <div class="o-head">
+                            <span class="o-id">#${o.id.substring(0,8).toUpperCase()}</span>
+                            <span class="o-total">৳${o.total}</span>
+                        </div>
+                        <div class="o-info">
+                            <p>👤 <strong>${o.name}</strong> | 📞 ${o.phone}</p>
+                            <p>📍 ${o.address}</p>
+                            <div style="margin:8px 0;">${itemsHtml}</div>
+                            ${o.deliveryZoneLabel ? `<p>🚚 ${o.deliveryZoneLabel} ${o.deliveryCharge ? '(৳' + o.deliveryCharge + ')' : '(ফ্রি)'}</p>` : ''}
+                        </div>
+                        <select class="status-sel" id="st-${o.id}">
+                            <option value="pending" ${o.status==='pending'?'selected':''}>⏳ অপেক্ষমান</option>
+                            <option value="processing" ${o.status==='processing'?'selected':''}>🔄 প্রক্রিয়াধীন</option>
+                            <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ ডেলিভারি হয়েছে</option>
+                            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ বাতিল</option>
+                        </select>
+                        <button class="upd-btn" onclick="updateStatus('${o.id}')">স্ট্যাটাস আপডেট</button>
+                    </div>`;
+                });
+                box.innerHTML = html;
+            } catch(e) { box.innerHTML = '<div class="no-data" style="color:red;">লোড ব্যর্থ</div>'; }
+        }
+
+        window.updateStatus = async function(id) {
+            const status = document.getElementById('st-' + id).value;
+            await updateDoc(doc(db, 'orders', id), { status });
+            alert('✅ স্ট্যাটাস আপডেট হয়েছে!');
+            loadDashboard();
+        };
+
+        // ========== SAVE BANNER ==========
+        async function saveBanner() {
+            const file = document.getElementById('bImg').files[0];
+            const order = parseInt(document.getElementById('bOrder').value) || 1;
+            const btn = document.getElementById('saveBannerBtn');
+            if (!file) { alert('ব্যানার ছবি দিন'); return; }
+            btn.disabled = true;
+            btn.textContent = 'আপলোড হচ্ছে...';
+            try {
+                const imageUrl = await uploadImage(file);
+                await addDoc(collection(db, 'banners'), { imageUrl, order, createdAt: serverTimestamp() });
+                alert('✅ ব্যানার যোগ হয়েছে!');
+                document.getElementById('bImg').value = '';
+                document.getElementById('bImgPrev').style.display = 'none';
+            } catch(e) {
+                alert('ব্যানার সেভ ব্যর্থ: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> ব্যানার সেভ করুন';
+            }
+        }
+
+        // ========== SAVE CATEGORY ==========
+        async function saveCategory() {
+            const name = document.getElementById('cName').value.trim();
+            const order = parseInt(document.getElementById('cOrder').value) || 1;
+            const file = document.getElementById('cImg').files[0];
+            const btn = document.getElementById('saveCategoryBtn');
+
+            if (!name || !file) { alert('ক্যাটাগরির নাম এবং ছবি আবশ্যক!'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'আপলোড হচ্ছে...';
+            try {
+                const imageUrl = await uploadImage(file);
+                btn.textContent = 'সেভ হচ্ছে...';
+                await addDoc(collection(db, 'categories'), {
+                    name, imageUrl, order, createdAt: serverTimestamp()
+                });
+                alert('✅ ক্যাটাগরি যোগ হয়েছে!');
+                document.getElementById('cName').value = '';
+                document.getElementById('cOrder').value = '1';
+                document.getElementById('cImg').value = '';
+                document.getElementById('cImgPrev').style.display = 'none';
+                loadCategoryList();
+                loadCategoryDropdown();
+            } catch(e) {
+                alert('ক্যাটাগরি সেভ ব্যর্থ: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> ক্যাটাগরি সেভ করুন';
+            }
+        }
+
+        // ========== CATEGORY LIST (for delete) ==========
+        async function loadCategoryList() {
+            const box = document.getElementById('categoryList');
+            box.innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
+            try {
+                const snap = await getDocs(query(collection(db, 'categories'), orderBy('order')));
+                if (snap.empty) { box.innerHTML = '<div class="no-data">কোনো ক্যাটাগরি নেই</div>'; return; }
+                let html = '';
+                snap.forEach(d => {
+                    const c = d.data();
+                    html += `
+                    <div class="c-item">
+                        <img src="${c.imageUrl}" alt="${c.name}">
+                        <span class="c-name">${c.name}</span>
+                        <span class="c-order">ক্রম: ${c.order ?? '-'}</span>
+                        <button class="del-btn" onclick="deleteCategory('${d.id}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>`;
+                });
+                box.innerHTML = html;
+            } catch(e) { box.innerHTML = '<div class="no-data" style="color:red;">লোড ব্যর্থ</div>'; }
+        }
+
+        window.deleteCategory = async function(id) {
+            if (!confirm('এই ক্যাটাগরি মুছে দেবেন?')) return;
+            await deleteDoc(doc(db, 'categories', id));
+            loadCategoryList();
+            loadCategoryDropdown();
+        };
+
+        // ========== CATEGORY DROPDOWN (for Add Product form) ==========
+        async function loadCategoryDropdown() {
+            const sel = document.getElementById('pCategory');
+            if (!sel) return;
+            const currentVal = sel.value;
+            try {
+                const snap = await getDocs(query(collection(db, 'categories'), orderBy('order')));
+                sel.innerHTML = '<option value="">বেছে নিন</option>';
+                if (snap.empty) {
+                    // Firestore-এ category না থাকলে default গুলো দেখাবে
+                    ['ব্যাগস','ফ্যাশন','জুতো','ঘড়ি'].forEach(c => {
+                        sel.innerHTML += `<option value="${c}">${c}</option>`;
+                    });
+                    return;
+                }
+                snap.forEach(d => {
+                    const c = d.data();
+                    sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                });
+                sel.value = currentVal;
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
